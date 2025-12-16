@@ -1,47 +1,84 @@
 <script setup>
-import HelloWorld from './components/HelloWorld.vue'
-import TheWelcome from './components/TheWelcome.vue'
+import { ref } from 'vue'
+import cancion from '@/assets/musica/Anemoia-LevitatingQuandary.mp3'
+// import cancion from '@/assets/musica/.mp3'
+// import cancion from '@/assets/musica/.mp3'
+// import cancion from '@/assets/musica/.mp3'
+// import cancion from '@/assets/musica/.mp3'
+
+const audioplayer = ref(null)
+
+const playSong = () => {
+  audioplayer.value.play()
+}
+
+const pauseSong = () => {
+  audioplayer.value.pause()
+}
+
+const fastForward = () => {
+  if (audioplayer.value) 
+  audioplayer.value.playbackRate = 4
+}
+const notFastForward = () => {
+  if (audioplayer.value) 
+  audioplayer.value.playbackRate = 1
+}
+
+const notBackForward = () => {
+  if (audioplayer.value) 
+  audioplayer.value.playbackRate = 1
+}
+
+const rewind = () => {
+  if (audioplayer.value) {
+    clearInterval(rewindInterval) // por si había uno activo
+    rewindInterval = setInterval(() => {
+      audioplayer.value.currentTime -= 0.2 // retrocede suavemente
+      if (audioplayer.value.currentTime <= 0) {
+        audioplayer.value.currentTime = 0
+        clearInterval(rewindInterval)
+      }
+    }, 20)
+  }
+}
+
+const stopRewind = () => {
+  clearInterval(rewindInterval)
+}
+
 </script>
 
+
 <template>
-  <header>
-    <img alt="Vue logo" class="logo" src="./assets/logo.svg" width="125" height="125" />
+  <div class="contenedor">
+    <audio ref="audioplayer" :src="cancion"></audio>
 
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
+    <div id="botones">
+      <button @click="playSong">▶️ Reproducir</button>
+      <button @click="pauseSong">⏸️ Pausar</button>
+      <button
+        @mousedown="fastForward"
+        @mouseup="notFastForward"
+        @mouseleave="notBackForward"
+      >⏩ Avanzar</button>
+      <button 
+        @mousedown="rewind"
+        @mouseup="stopRewind"
+        @mouseleave="stopRewind"
+      >⏪ Retroceder</button>
     </div>
-  </header>
-
-  <main>
-    <TheWelcome />
-  </main>
+  </div>
 </template>
 
+
 <style scoped>
-header {
-  line-height: 1.5;
+.contenedor {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
-
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
-}
-
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
-
-  .logo {
-    margin: 0 2rem 0 0;
-  }
-
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
+#botones button {
+  margin-right: 5px;
 }
 </style>
