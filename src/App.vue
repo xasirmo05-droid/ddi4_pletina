@@ -1,84 +1,75 @@
 <script setup>
-import { ref } from 'vue'
-import cancion from '@/assets/musica/Anemoia-LevitatingQuandary.mp3'
-// import cancion from '@/assets/musica/.mp3'
-// import cancion from '@/assets/musica/.mp3'
-// import cancion from '@/assets/musica/.mp3'
-// import cancion from '@/assets/musica/.mp3'
+import { ref, nextTick } from 'vue'
+import Volumen from '@/components/volumen.vue'
+import Controles from '@/components/controles.vue'
+import Imagen from '@/components/imagen.vue'
+import Ondas from '@/components/ondas.vue'
+
+import cancionA from '@/assets/musica/Anemoia-LevitatingQuandary.mp3'
+import cancionB from '@/assets/musica/weii.mp3'
 
 const audioplayer = ref(null)
+const volumenActual = ref(1)
+const visualizadorActivo = ref(false)
 
-const playSong = () => {
-  audioplayer.value.play()
-}
+const canciones = [cancionA, cancionB]
+const indiceCancion = ref(0)
+const cancion = ref(canciones[indiceCancion.value])
 
-const pauseSong = () => {
+const reproducirCancion = async () => {
+  if (!audioplayer.value) return
+
+  visualizadorActivo.value = false
   audioplayer.value.pause()
+  audioplayer.value.currentTime = 0
+
+  cancion.value = canciones[indiceCancion.value]
+  await nextTick()
+
+  audioplayer.value.play()
+  visualizadorActivo.value = true
 }
 
-const fastForward = () => {
-  if (audioplayer.value) 
-  audioplayer.value.playbackRate = 4
-}
-const notFastForward = () => {
-  if (audioplayer.value) 
-  audioplayer.value.playbackRate = 1
+const siguienteCancion = () => {
+  indiceCancion.value =
+    (indiceCancion.value + 1) % canciones.length
+  reproducirCancion()
 }
 
-const notBackForward = () => {
-  if (audioplayer.value) 
-  audioplayer.value.playbackRate = 1
+const anteriorCancion = () => {
+  indiceCancion.value =
+    (indiceCancion.value - 1 + canciones.length) % canciones.length
+  reproducirCancion()
 }
 
-const rewind = () => {
-  if (audioplayer.value) {
-    clearInterval(rewindInterval) // por si había uno activo
-    rewindInterval = setInterval(() => {
-      audioplayer.value.currentTime -= 0.2 // retrocede suavemente
-      if (audioplayer.value.currentTime <= 0) {
-        audioplayer.value.currentTime = 0
-        clearInterval(rewindInterval)
-      }
-    }, 20)
-  }
+const handlePlay = () => {
+  audioplayer.value?.play()
+  visualizadorActivo.value = true
 }
 
-const stopRewind = () => {
-  clearInterval(rewindInterval)
+const handlePause = () => {
+  audioplayer.value?.pause()
+  visualizadorActivo.value = false
 }
 
+const handleVolumeChange = (val) => {
+  volumenActual.value = val
+  if (audioplayer.value) audioplayer.value.volume = val
+}
 </script>
 
-
 <template>
-  <div class="contenedor">
+  <div class="reproductor">
     <audio ref="audioplayer" :src="cancion"></audio>
-
-    <div id="botones">
-      <button @click="playSong">▶️ Reproducir</button>
-      <button @click="pauseSong">⏸️ Pausar</button>
-      <button
-        @mousedown="fastForward"
-        @mouseup="notFastForward"
-        @mouseleave="notBackForward"
-      >⏩ Avanzar</button>
-      <button 
-        @mousedown="rewind"
-        @mouseup="stopRewind"
-        @mouseleave="stopRewind"
-      >⏪ Retroceder</button>
-    </div>
+    <Ondas :audio="audioplayer" :start="visualizadorActivo" />
+    <Volumen :volume="volumenActual" @update:volume="handleVolumeChange" />
+    <audio ref="audioplayer" :src="cancion"></audio>
+    <Controles
+      @play="handlePlay"
+      @pause="handlePause"
+      @prev="anteriorCancion"
+      @next="siguienteCancion"
+    />
+    <Imagen :audio="audioplayer" :start="visualizadorActivo" />
   </div>
 </template>
-
-
-<style scoped>
-.contenedor {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-#botones button {
-  margin-right: 5px;
-}
-</style>
