@@ -6,7 +6,6 @@ import vueDevTools from 'vite-plugin-vue-devtools'
 
 // https://vite.dev/config/
 export default defineConfig({
-  base: '/ddi4_pletina/',
   plugins: [
     vue(),
     vueDevTools(),
@@ -15,5 +14,6 @@ export default defineConfig({
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
     },
+    base: '/ddi4_pletina/'
   },
 })
