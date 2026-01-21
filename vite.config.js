@@ -14,6 +14,6 @@ export default defineConfig({
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
     },
-    base: '/ddi4_pletina/'
   },
+  base: '/ddi4_pletina/'
 })
